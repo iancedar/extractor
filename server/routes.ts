@@ -91,9 +91,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const extraction = await storage.createExtraction({
         url,
         content: contentResult.content,
-        primaryKeywords: keywordResult.primaryKeywords,
-        secondaryKeywords: keywordResult.secondaryKeywords,
-        supportingKeywords: keywordResult.supportingKeywords,
+        headlinePhrases: keywordResult.headlinePhrases,
+        keyAnnouncements: keywordResult.keyAnnouncements,
+        companyActions: keywordResult.companyActions,
+        datesAndEvents: keywordResult.datesAndEvents,
+        productServiceNames: keywordResult.productServiceNames,
+        executiveQuotes: keywordResult.executiveQuotes,
+        financialMetrics: keywordResult.financialMetrics,
+        locations: keywordResult.locations,
         extractionMethod,
         confidenceScore,
         extractionTime,
@@ -107,21 +112,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         totalResponseTime: currentStats.totalResponseTime + extractionTime,
       });
       
+      const totalKeywords = extraction.headlinePhrases.length + 
+                          extraction.keyAnnouncements.length + 
+                          extraction.companyActions.length + 
+                          extraction.datesAndEvents.length + 
+                          extraction.productServiceNames.length + 
+                          extraction.executiveQuotes.length + 
+                          extraction.financialMetrics.length + 
+                          extraction.locations.length;
+
       const response: ExtractionResponse = {
         id: extraction.id,
         url: extraction.url,
         content: getContentPreview(extraction.content, 1000),
-        primaryKeywords: extraction.primaryKeywords,
-        secondaryKeywords: extraction.secondaryKeywords,
-        supportingKeywords: extraction.supportingKeywords,
-        extractionMethod: extraction.extractionMethod,
-        confidenceScore: extraction.confidenceScore,
+        headlinePhrases: extraction.headlinePhrases,
+        keyAnnouncements: extraction.keyAnnouncements,
+        companyActions: extraction.companyActions,
+        datesAndEvents: extraction.datesAndEvents,
+        productServiceNames: extraction.productServiceNames,
+        executiveQuotes: extraction.executiveQuotes,
+        financialMetrics: extraction.financialMetrics,
+        locations: extraction.locations,
+        extractionMethod: extraction.extractionMethod as 'ai' | 'fallback' | 'enhanced',
+        confidenceScore: extraction.confidenceScore ?? undefined,
         extractionTime: extraction.extractionTime,
         stats: {
           wordCount: contentResult.wordCount,
-          totalKeywords: extraction.primaryKeywords.length + 
-                         extraction.secondaryKeywords.length + 
-                         extraction.supportingKeywords.length,
+          totalKeywords,
+          keywordsByCategory: {
+            'headline-phrases': extraction.headlinePhrases.length,
+            'key-announcements': extraction.keyAnnouncements.length,
+            'company-actions': extraction.companyActions.length,
+            'dates-events': extraction.datesAndEvents.length,
+            'product-service-names': extraction.productServiceNames.length,
+            'executive-quotes': extraction.executiveQuotes.length,
+            'financial-metrics': extraction.financialMetrics.length,
+            'locations': extraction.locations.length,
+          },
         },
       };
       

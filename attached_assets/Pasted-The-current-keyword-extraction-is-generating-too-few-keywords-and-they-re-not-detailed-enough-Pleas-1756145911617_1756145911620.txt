@@ -1,0 +1,68 @@
+The current keyword extraction is generating too few keywords and they're not detailed enough. Please fix the following issues:
+
+INCREASE KEYWORD QUANTITY:
+- Extract 50-100 total keywords across all categories (not just 5-15 per category)
+- Each category should have 8-15 keywords minimum
+- Add more comprehensive extraction patterns
+
+IMPROVE GEMINI PROMPT:
+Update the Gemini API prompt to be more specific and generate more keywords:
+
+"Analyze this press release content thoroughly and extract comprehensive searchable keywords and phrases that actually exist in the text. Extract MORE keywords to ensure complete coverage.
+
+Content: [ACTUAL_PRESS_RELEASE_CONTENT]
+
+Extract detailed, searchable keywords in these categories. For each category, provide 10-15 keywords minimum:
+
+1. HEADLINE PHRASES (extract ALL significant 2-8 word phrases from headlines, subheadings, and titles)
+2. KEY ANNOUNCEMENTS (extract MULTIPLE complete sentences and partial sentences about announcements, launches, partnerships, expansions)
+3. COMPANY ACTIONS (extract ALL instances of company name + actions, including: launches, announces, partners, acquires, expands, introduces, develops, creates)
+4. DATES & EVENTS (extract ALL temporal references: specific dates, quarters, years, timeframes, event names, conference names)
+5. PRODUCT/SERVICE NAMES (extract ALL product names, service names, platform names, technology names, brand names mentioned)
+6. EXECUTIVE QUOTES (extract MULTIPLE meaningful phrases from all quoted executives, spokespersons, leaders)
+7. FINANCIAL/METRICS (extract ALL financial data: funding amounts, revenue figures, growth percentages, user numbers, market size, valuations)
+8. LOCATIONS (extract ALL geographic references: cities, states, countries, regions, headquarters, office locations, market areas)
+
+ENHANCED EXTRACTION RULES:
+- Extract 10-15 keywords per category minimum
+- Each keyword should be 2-20 words long (allow longer phrases)
+- Include variations and synonyms from the text
+- Extract both complete sentences and meaningful partial phrases
+- Include industry-specific terminology that appears
+- Extract competitor names and partner company names
+- Include technical terms and product features mentioned
+- Extract target market descriptions and customer segments
+
+Be thorough and comprehensive - better to extract more relevant keywords than miss important searchable phrases."
+
+ADDITIONAL IMPROVEMENTS:
+1. Add a "More Keywords" button that re-runs extraction with expanded parameters
+2. Include keyword frequency/importance scoring
+3. Add keyword length filter options (2-5 words, 5-10 words, 10+ words)
+4. Show total keyword count for each category
+5. Add search functionality within extracted keywords
+6. Include keyword clustering by topic/theme
+
+FALLBACK ENHANCEMENT:
+If Gemini extraction still doesn't provide enough keywords, add these supplementary extraction methods:
+- N-gram extraction (2-gram, 3-gram, 4-gram phrases)
+- Named Entity Recognition for people, organizations, locations
+- Industry-specific keyword dictionaries
+- Synonym expansion for key terms
+- Related term extraction using word associations
+
+QUALITY IMPROVEMENTS:
+- Remove duplicate keywords across categories
+- Sort keywords by relevance/frequency
+- Add keyword validation against original content
+- Include partial phrase matching for better coverage
+- Extract contextual phrases around important entities
+
+UI ENHANCEMENTS:
+- Display total keyword count prominently
+- Add progress bar showing extraction completeness
+- Include "Extract More" button for additional passes
+- Show keyword distribution across categories
+- Add keyword search and filtering options
+
+Please implement these changes to ensure the tool extracts comprehensive, detailed keywords (50-100 total) that provide excellent coverage of the press release content for LLM searching.

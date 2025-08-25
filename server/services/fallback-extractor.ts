@@ -1,82 +1,122 @@
 export interface FallbackKeywordResult {
-  primaryKeywords: string[];
-  secondaryKeywords: string[];
-  supportingKeywords: string[];
+  headlinePhrases: string[];
+  keyAnnouncements: string[];
+  companyActions: string[];
+  datesAndEvents: string[];
+  productServiceNames: string[];
+  executiveQuotes: string[];
+  financialMetrics: string[];
+  locations: string[];
   confidenceScore: number;
 }
 
 export function extractKeywordsFallback(content: string): FallbackKeywordResult {
+  const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 10);
   const words = content.toLowerCase().split(/\s+/);
-  const sentences = content.split(/[.!?]+/);
   
-  // Common press release terms to identify
-  const companyIndicators = /\b(inc|corp|ltd|llc|company|corporation|enterprises|technologies|solutions)\b/gi;
-  const productIndicators = /\b(announces?|launches?|introduces?|releases?|unveils?)\s+[\w\s]{1,30}/gi;
-  const peopleIndicators = /\b(ceo|president|director|manager|founder|chief)\s+[\w\s]{1,20}/gi;
-  const locationIndicators = /\b[A-Z][a-z]+,?\s+[A-Z]{2}\b|\b[A-Z][a-z]+\s+[A-Z][a-z]+/g;
-  const dateIndicators = /\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2},?\s+\d{4}|\d{1,2}\/\d{1,2}\/\d{4}/gi;
+  // Enhanced patterns for comprehensive extraction
+  const headlinePatterns = /^.{20,100}$|\b[A-Z][^.!?]{20,100}/gm;
+  const announcementPatterns = /\b(announces?|launches?|introduces?|releases?|unveils?|expands?|partners?|acquires?)\b[^.!?]{10,150}/gi;
+  const companyActionPatterns = /\b[A-Z][a-zA-Z\s&]{2,30}\b\s+(announces?|launches?|introduces?|partners?|expands?|acquires?|develops?|creates?)[^.!?]{5,100}/gi;
+  const dateEventPatterns = /\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2},?\s+\d{4}|\d{1,2}\/\d{1,2}\/\d{4}|Q[1-4]\s+\d{4}|\d{4}\s+(conference|summit|event|meeting)/gi;
+  const productPatterns = /\b[A-Z][a-zA-Z\s]{2,40}\b\s+(platform|service|product|solution|technology|software|application|system)/gi;
+  const quotePatterns = /"[^"]{20,200}"/g;
+  const financialPatterns = /\$[\d,]+\.?\d*\s?(million|billion|thousand)?|\d+%\s+(growth|increase|decrease)|revenue\s+of\s+\$[\d,]+|funding\s+of\s+\$[\d,]+/gi;
+  const locationPatterns = /\b[A-Z][a-z]+,?\s+[A-Z]{2}\b|\b[A-Z][a-z]+\s+[A-Z][a-z]+\b|headquarters\s+in\s+[A-Z][a-z\s,]+/gi;
   
-  // Extract potential keywords using frequency analysis
-  const wordFreq: { [key: string]: number } = {};
-  const minWordLength = 3;
-  const stopWords = new Set([
-    'the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can', 'had', 'her', 'was', 'one', 'our', 'out', 'day', 'get', 'has', 'him', 'his', 'how', 'man', 'new', 'now', 'old', 'see', 'two', 'who', 'boy', 'did', 'its', 'let', 'put', 'say', 'she', 'too', 'use'
-  ]);
+  // Extract N-grams for better phrase coverage
+  const extractNGrams = (text: string, n: number): string[] => {
+    const words = text.split(/\s+/).filter(word => word.length > 2);
+    const ngrams: string[] = [];
+    for (let i = 0; i <= words.length - n; i++) {
+      const ngram = words.slice(i, i + n).join(' ');
+      if (ngram.length >= 10 && ngram.length <= 100) {
+        ngrams.push(ngram);
+      }
+    }
+    return ngrams;
+  };
   
-  words.forEach(word => {
-    const cleanWord = word.replace(/[^\w]/g, '');
-    if (cleanWord.length >= minWordLength && !stopWords.has(cleanWord)) {
-      wordFreq[cleanWord] = (wordFreq[cleanWord] || 0) + 1;
+  // Extract meaningful phrases
+  const bigrams = extractNGrams(content, 2);
+  const trigrams = extractNGrams(content, 3);
+  const fourgrams = extractNGrams(content, 4);
+  
+  // Enhanced frequency analysis with phrases
+  const phraseFreq: { [key: string]: number } = {};
+  [...bigrams, ...trigrams, ...fourgrams].forEach(phrase => {
+    const cleanPhrase = phrase.toLowerCase().trim();
+    if (cleanPhrase.length >= 10) {
+      phraseFreq[cleanPhrase] = (phraseFreq[cleanPhrase] || 0) + 1;
     }
   });
   
-  // Sort by frequency
-  const frequentWords = Object.entries(wordFreq)
+  const topPhrases = Object.entries(phraseFreq)
     .sort(([,a], [,b]) => b - a)
-    .slice(0, 30)
-    .map(([word]) => word);
+    .slice(0, 50)
+    .map(([phrase]) => phrase);
   
-  // Extract entities
-  const companies = extractMatches(content, companyIndicators)
-    .map(match => match.replace(/\b(inc|corp|ltd|llc)\b/gi, '').trim())
-    .filter(company => company.length > 2);
+  // Extract by categories with enhanced patterns
+  const headlinePhrases = [
+    ...extractMatches(content, headlinePatterns).slice(0, 15),
+    ...topPhrases.slice(0, 10)
+  ].filter(phrase => phrase.length >= 10 && phrase.length <= 100);
   
-  const products = extractMatches(content, productIndicators)
-    .map(match => match.replace(/^(announces?|launches?|introduces?|releases?|unveils?)\s+/i, '').trim())
-    .filter(product => product.length > 2);
+  const keyAnnouncements = [
+    ...extractMatches(content, announcementPatterns).slice(0, 15),
+    ...sentences.filter(s => /\b(announces?|launches?|introduces?)\b/i.test(s)).slice(0, 10)
+  ].filter(announcement => announcement.length >= 20);
   
-  const people = extractMatches(content, peopleIndicators)
-    .filter(person => person.length > 3);
+  const companyActions = [
+    ...extractMatches(content, companyActionPatterns).slice(0, 15),
+    ...sentences.filter(s => /\b(partners?|expands?|acquires?)\b/i.test(s)).slice(0, 10)
+  ].filter(action => action.length >= 15);
   
-  const locations = extractMatches(content, locationIndicators);
-  const dates = extractMatches(content, dateIndicators);
+  const datesAndEvents = [
+    ...extractMatches(content, dateEventPatterns).slice(0, 15),
+    ...sentences.filter(s => /\b(conference|summit|event|meeting|quarter)\b/i.test(s)).slice(0, 10)
+  ];
   
-  // Categorize keywords
-  const primaryKeywords = [
-    ...companies.slice(0, 2),
-    ...products.slice(0, 2),
-    ...frequentWords.slice(0, 3)
-  ].filter(Boolean).slice(0, 6);
+  const productServiceNames = [
+    ...extractMatches(content, productPatterns).slice(0, 15),
+    ...topPhrases.filter(p => /\b(platform|service|product|solution|technology)\b/i.test(p)).slice(0, 10)
+  ];
   
-  const secondaryKeywords = [
-    ...people.slice(0, 2),
-    ...frequentWords.slice(3, 10),
-  ].filter(Boolean).slice(0, 8);
+  const executiveQuotes = [
+    ...extractMatches(content, quotePatterns).slice(0, 15),
+    ...sentences.filter(s => s.includes('said') || s.includes('stated')).slice(0, 10)
+  ];
   
-  const supportingKeywords = [
-    ...locations.slice(0, 2),
-    ...dates.slice(0, 2),
-    ...frequentWords.slice(10, 20)
-  ].filter(Boolean).slice(0, 10);
+  const financialMetrics = [
+    ...extractMatches(content, financialPatterns).slice(0, 15),
+    ...sentences.filter(s => /\b(revenue|funding|growth|\$|%)\b/i.test(s)).slice(0, 10)
+  ];
+  
+  const locations = [
+    ...extractMatches(content, locationPatterns).slice(0, 15),
+    ...sentences.filter(s => /\b(headquarters|based in|located)\b/i.test(s)).slice(0, 10)
+  ];
+  
+  // Remove duplicates and ensure minimum length
+  const dedupe = (arr: string[]): string[] => Array.from(new Set(arr.filter(item => item && item.length >= 5)));
+  
+  const result = {
+    headlinePhrases: dedupe(headlinePhrases).slice(0, 15),
+    keyAnnouncements: dedupe(keyAnnouncements).slice(0, 15),
+    companyActions: dedupe(companyActions).slice(0, 15),
+    datesAndEvents: dedupe(datesAndEvents).slice(0, 15),
+    productServiceNames: dedupe(productServiceNames).slice(0, 15),
+    executiveQuotes: dedupe(executiveQuotes).slice(0, 15),
+    financialMetrics: dedupe(financialMetrics).slice(0, 15),
+    locations: dedupe(locations).slice(0, 15)
+  };
   
   // Calculate confidence score based on extraction quality
-  const totalExtracted = primaryKeywords.length + secondaryKeywords.length + supportingKeywords.length;
-  const confidenceScore = Math.min(85, Math.max(40, totalExtracted * 4));
+  const totalExtracted = Object.values(result).reduce((sum, arr) => sum + arr.length, 0);
+  const confidenceScore = Math.min(90, Math.max(50, totalExtracted * 1.2));
   
   return {
-    primaryKeywords: [...new Set(primaryKeywords)],
-    secondaryKeywords: [...new Set(secondaryKeywords)],
-    supportingKeywords: [...new Set(supportingKeywords)],
+    ...result,
     confidenceScore
   };
 }
@@ -86,5 +126,5 @@ function extractMatches(content: string, pattern: RegExp): string[] {
   return matches
     .map(match => match.trim())
     .filter(match => match.length > 0)
-    .slice(0, 5); // Limit results
+    .slice(0, 20); // Increased limit for more comprehensive extraction
 }

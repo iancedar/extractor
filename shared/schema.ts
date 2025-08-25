@@ -7,10 +7,15 @@ export const extractions = pgTable("extractions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   url: text("url").notNull(),
   content: text("content").notNull(),
-  primaryKeywords: jsonb("primary_keywords").$type<string[]>().notNull(),
-  secondaryKeywords: jsonb("secondary_keywords").$type<string[]>().notNull(),
-  supportingKeywords: jsonb("supporting_keywords").$type<string[]>().notNull(),
-  extractionMethod: text("extraction_method").notNull(), // 'ai' or 'fallback'
+  headlinePhrases: jsonb("headline_phrases").$type<string[]>().notNull(),
+  keyAnnouncements: jsonb("key_announcements").$type<string[]>().notNull(),
+  companyActions: jsonb("company_actions").$type<string[]>().notNull(),
+  datesAndEvents: jsonb("dates_and_events").$type<string[]>().notNull(),
+  productServiceNames: jsonb("product_service_names").$type<string[]>().notNull(),
+  executiveQuotes: jsonb("executive_quotes").$type<string[]>().notNull(),
+  financialMetrics: jsonb("financial_metrics").$type<string[]>().notNull(),
+  locations: jsonb("locations").$type<string[]>().notNull(),
+  extractionMethod: text("extraction_method").notNull(), // 'ai' or 'fallback' or 'enhanced'
   confidenceScore: integer("confidence_score"), // 0-100
   extractionTime: integer("extraction_time").notNull(), // milliseconds
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -33,15 +38,21 @@ export const extractionResponseSchema = z.object({
   id: z.string(),
   url: z.string(),
   content: z.string(),
-  primaryKeywords: z.array(z.string()),
-  secondaryKeywords: z.array(z.string()),
-  supportingKeywords: z.array(z.string()),
-  extractionMethod: z.enum(['ai', 'fallback']),
+  headlinePhrases: z.array(z.string()),
+  keyAnnouncements: z.array(z.string()),
+  companyActions: z.array(z.string()),
+  datesAndEvents: z.array(z.string()),
+  productServiceNames: z.array(z.string()),
+  executiveQuotes: z.array(z.string()),
+  financialMetrics: z.array(z.string()),
+  locations: z.array(z.string()),
+  extractionMethod: z.enum(['ai', 'fallback', 'enhanced']),
   confidenceScore: z.number().optional(),
   extractionTime: z.number(),
   stats: z.object({
     wordCount: z.number(),
     totalKeywords: z.number(),
+    keywordsByCategory: z.record(z.number()),
   }),
 });
 

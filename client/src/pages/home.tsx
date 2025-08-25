@@ -17,7 +17,8 @@ export default function Home() {
     error, 
     result, 
     retry,
-    useFallback 
+    useFallback,
+    extractMore
   } = useKeywordExtraction();
 
   const handleExtract = async () => {
@@ -39,7 +40,7 @@ export default function Home() {
                 </div>
                 Press Release Keyword Extractor
               </h1>
-              <p className="text-slate-600 mt-1">Extract searchable keywords from press releases using AI-powered analysis</p>
+              <p className="text-slate-600 mt-1">Extract 50-100 comprehensive keywords from press releases across 8 detailed categories</p>
             </div>
             
             <ApiHealthStatus />
@@ -80,6 +81,7 @@ export default function Home() {
           <KeywordsResults 
             result={result}
             isLoading={isLoading}
+            onExtractMore={extractMore}
             data-testid="keywords-results"
           />
         </div>

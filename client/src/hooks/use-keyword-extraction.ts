@@ -7,7 +7,7 @@ export function useKeywordExtraction() {
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<ExtractionResponse | null>(null);
+  const [result, setResult] = useState<ExtractionResponse | undefined>(undefined);
   const [lastUrl, setLastUrl] = useState<string>("");
   const { toast } = useToast();
 
@@ -49,8 +49,8 @@ export function useKeywordExtraction() {
       setResult(extractionResult);
       
       toast({
-        title: "Keywords Extracted Successfully",
-        description: `Found ${extractionResult.stats.totalKeywords} keywords using ${extractionResult.extractionMethod === 'ai' ? 'AI' : 'fallback'} method`,
+        title: "Keywords Extracted Successfully", 
+        description: `Found ${extractionResult.stats.totalKeywords} keywords across 8 categories using ${extractionResult.extractionMethod === 'ai' ? 'AI' : extractionResult.extractionMethod === 'enhanced' ? 'enhanced' : 'fallback'} method`,
       });
       
     } catch (err) {
@@ -86,6 +86,13 @@ export function useKeywordExtraction() {
     }
   }, [lastUrl, extractKeywords]);
 
+  const extractMore = useCallback(() => {
+    if (lastUrl) {
+      // Run enhanced extraction with expanded parameters
+      extractKeywords(lastUrl, false);
+    }
+  }, [lastUrl, extractKeywords]);
+
   return {
     extractKeywords,
     isLoading,
@@ -93,6 +100,7 @@ export function useKeywordExtraction() {
     error,
     result,
     retry,
-    useFallback
+    useFallback,
+    extractMore
   };
 }
