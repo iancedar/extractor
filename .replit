@@ -17,6 +17,8 @@ externalPort = 80
 [env]
 PORT = "5000"
 
+# /hu
+
 [workflows]
 runButton = "Project"
 
