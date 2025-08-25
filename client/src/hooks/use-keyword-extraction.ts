@@ -29,7 +29,7 @@ export function useKeywordExtraction() {
     setIsLoading(true);
     setProgress(0);
     setError(null);
-    setResult(null);
+    setResult(undefined);
     setLastUrl(url);
 
     const progressInterval = simulateProgress();

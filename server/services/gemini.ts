@@ -18,41 +18,64 @@ export interface KeywordExtractionResult {
 
 export async function extractKeywordsWithAI(content: string): Promise<KeywordExtractionResult> {
   try {
-    const systemPrompt = `Analyze this press release content thoroughly and extract comprehensive searchable keywords and phrases that actually exist in the text. Extract MORE keywords to ensure complete coverage.
+    const systemPrompt = `You are a professional keyword extraction specialist. Analyze this press release and extract complete, meaningful phrases that someone could use to search for this exact press release in ChatGPT, Claude, or Gemini.
 
-Extract detailed, searchable keywords in these categories. For each category, provide 10-15 keywords minimum:
+Extract COMPLETE, READABLE phrases in these categories. Each phrase should be a natural, searchable sentence or phrase:
 
-1. HEADLINE PHRASES (extract ALL significant 2-8 word phrases from headlines, subheadings, and titles)
-2. KEY ANNOUNCEMENTS (extract MULTIPLE complete sentences and partial sentences about announcements, launches, partnerships, expansions)
-3. COMPANY ACTIONS (extract ALL instances of company name + actions, including: launches, announces, partners, acquires, expands, introduces, develops, creates)
-4. DATES & EVENTS (extract ALL temporal references: specific dates, quarters, years, timeframes, event names, conference names)
-5. PRODUCT/SERVICE NAMES (extract ALL product names, service names, platform names, technology names, brand names mentioned)
-6. EXECUTIVE QUOTES (extract MULTIPLE meaningful phrases from all quoted executives, spokespersons, leaders)
-7. FINANCIAL/METRICS (extract ALL financial data: funding amounts, revenue figures, growth percentages, user numbers, market size, valuations)
-8. LOCATIONS (extract ALL geographic references: cities, states, countries, regions, headquarters, office locations, market areas)
+COMPANY & ANNOUNCEMENT:
+- Extract the main company announcement (complete sentence)
+- Company name and what they're launching/announcing
+- Business model and service description
 
-ENHANCED EXTRACTION RULES:
-- Extract 10-15 keywords per category minimum
-- Each keyword should be 2-20 words long (allow longer phrases)
-- Include variations and synonyms from the text
-- Extract both complete sentences and meaningful partial phrases
-- Include industry-specific terminology that appears
-- Extract competitor names and partner company names
-- Include technical terms and product features mentioned
-- Extract target market descriptions and customer segments
+PRODUCTS & SERVICES:
+- Full product/service names and descriptions
+- Key features and benefits mentioned
+- Platform or technology descriptions
 
-Be thorough and comprehensive - better to extract more relevant keywords than miss important searchable phrases.
+EXECUTIVE INFORMATION:
+- Complete executive quotes (full sentences)
+- Executive names and titles
+- Company spokesperson information
+
+BUSINESS DETAILS:
+- Target market and customer segments
+- Pricing and availability information
+- Geographic markets and locations
+
+INDUSTRY CONTEXT:
+- Healthcare sector and industry terms
+- Competitive advantages mentioned
+- Market positioning statements
+
+TECHNICAL DETAILS:
+- Technology platform descriptions
+- Service delivery methods
+- Integration capabilities
+
+FORMAT REQUIREMENTS:
+- Each keyword should be 5-25 words long
+- Must be complete, readable phrases
+- No fragments or incomplete sentences
+- No repetition of the same information
+- Each phrase should be unique and searchable
+
+Return clean, complete phrases like:
+- 'Simple Consult launches affordable virtual healthcare consultation platform'
+- 'Delaware-based digital healthcare provider targets routine medical services'
+- 'Benjamin Domingo announces mission to simplify healthcare access'
+
+DO NOT return fragments like 'digital healthcare2w' or 'the service2w'
 
 Respond with JSON in this exact format:
 {
-  "headlinePhrases": ["phrase1", "phrase2", ...],
-  "keyAnnouncements": ["announcement1", "announcement2", ...],
-  "companyActions": ["action1", "action2", ...],
-  "datesAndEvents": ["date1", "event1", ...],
-  "productServiceNames": ["product1", "service1", ...],
-  "executiveQuotes": ["quote1", "quote2", ...],
-  "financialMetrics": ["metric1", "figure1", ...],
-  "locations": ["location1", "location2", ...],
+  "headlinePhrases": ["complete phrase 1", "complete phrase 2", ...],
+  "keyAnnouncements": ["full announcement 1", "full announcement 2", ...],
+  "companyActions": ["company action phrase 1", "company action phrase 2", ...],
+  "datesAndEvents": ["date/event phrase 1", "date/event phrase 2", ...],
+  "productServiceNames": ["product description 1", "service description 2", ...],
+  "executiveQuotes": ["complete executive quote 1", "executive quote 2", ...],
+  "financialMetrics": ["financial detail 1", "financial detail 2", ...],
+  "locations": ["location detail 1", "location detail 2", ...],
   "confidenceScore": 95
 }`;
 

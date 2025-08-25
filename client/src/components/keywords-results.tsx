@@ -2,11 +2,13 @@ import type { ExtractionResponse } from "@shared/schema";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DebugPanel } from "./debug-panel";
 
 interface KeywordsResultsProps {
   result?: ExtractionResponse;
   isLoading: boolean;
   onExtractMore?: () => void;
+  rawContent?: string;
 }
 
 const categoryConfig = {
@@ -84,9 +86,10 @@ const categoryConfig = {
   }
 };
 
-export function KeywordsResults({ result, isLoading, onExtractMore }: KeywordsResultsProps) {
+export function KeywordsResults({ result, isLoading, onExtractMore, rawContent }: KeywordsResultsProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLengthFilter, setSelectedLengthFilter] = useState("all");
+  const [showDebug, setShowDebug] = useState(false);
 
   const filterKeywords = (keywords: string[]) => {
     let filtered = keywords;
@@ -250,9 +253,6 @@ export function KeywordsResults({ result, isLoading, onExtractMore }: KeywordsRe
                         title={`${keyword.split(' ').length} words`}
                       >
                         {keyword}
-                        <span className="ml-2 text-xs opacity-60">
-                          {keyword.split(' ').length}w
-                        </span>
                       </span>
                     ))}
                   </div>
@@ -285,6 +285,16 @@ export function KeywordsResults({ result, isLoading, onExtractMore }: KeywordsRe
             <p className="text-lg font-medium mb-2">No Keywords Yet</p>
             <p>Enter a press release URL above to extract 50-100 comprehensive keywords</p>
           </div>
+        )}
+
+        {/* Debug Panel */}
+        {result && (
+          <DebugPanel
+            result={result}
+            rawContent={rawContent}
+            isVisible={showDebug}
+            onToggle={() => setShowDebug(!showDebug)}
+          />
         )}
       </div>
     </div>

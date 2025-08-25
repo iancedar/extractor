@@ -1,0 +1,110 @@
+URGENT FIX NEEDED: The current keyword extraction is completely broken. The keywords are fragmented (like "2w", "6w"), repetitive, and not forming complete meaningful phrases. 
+
+MAJOR ISSUES TO FIX:
+
+1. FRAGMENTED OUTPUT: Keywords are broken into pieces with strange suffixes like "2w", "6w", "10w"
+2. INCOMPLETE PHRASES: Getting "digital healthcare2w" instead of "digital healthcare platform"
+3. REPETITIVE CONTENT: Same fragments appearing multiple times
+4. NOT CONTEXTUAL: Keywords don't form searchable phrases for LLMs
+
+COMPLETE REWRITE NEEDED:
+
+GEMINI PROMPT REWRITE:
+Replace the current Gemini prompt with this exact version:
+
+"You are a professional keyword extraction specialist. Analyze this press release and extract complete, meaningful phrases that someone could use to search for this exact press release in ChatGPT, Claude, or Gemini.
+
+Press Release Content:
+[ACTUAL_CONTENT_HERE]
+
+Extract COMPLETE, READABLE phrases in these categories. Each phrase should be a natural, searchable sentence or phrase:
+
+COMPANY & ANNOUNCEMENT:
+- Extract the main company announcement (complete sentence)
+- Company name and what they're launching/announcing
+- Business model and service description
+
+PRODUCTS & SERVICES:
+- Full product/service names and descriptions
+- Key features and benefits mentioned
+- Platform or technology descriptions
+
+EXECUTIVE INFORMATION:
+- Complete executive quotes (full sentences)
+- Executive names and titles
+- Company spokesperson information
+
+BUSINESS DETAILS:
+- Target market and customer segments
+- Pricing and availability information
+- Geographic markets and locations
+
+INDUSTRY CONTEXT:
+- Healthcare sector and industry terms
+- Competitive advantages mentioned
+- Market positioning statements
+
+TECHNICAL DETAILS:
+- Technology platform descriptions
+- Service delivery methods
+- Integration capabilities
+
+FORMAT REQUIREMENTS:
+- Each keyword should be 5-25 words long
+- Must be complete, readable phrases
+- No fragments or incomplete sentences
+- No repetition of the same information
+- Each phrase should be unique and searchable
+
+Return clean, complete phrases like:
+- 'Simple Consult launches affordable virtual healthcare consultation platform'
+- 'Delaware-based digital healthcare provider targets routine medical services'
+- 'Benjamin Domingo announces mission to simplify healthcare access'
+
+DO NOT return fragments like 'digital healthcare2w' or 'the service2w'"
+
+CODE FIXES NEEDED:
+
+1. FIX TEXT PROCESSING:
+   - Remove all text fragmentation logic
+   - Stop adding suffixes like "2w", "6w" to keywords
+   - Ensure complete sentence extraction
+
+2. FIX GEMINI API RESPONSE PARSING:
+   - Properly parse JSON response without breaking phrases
+   - Remove any text truncation or word limiting
+   - Preserve complete phrases from API response
+
+3. ADD CONTENT VALIDATION:
+   - Show first 500 characters of actual fetched content
+   - Verify keywords match the source content
+   - Add content quality checks
+
+4. IMPROVE DISPLAY:
+   - Show keywords as complete, readable phrases
+   - Remove duplicate or similar phrases
+   - Group related concepts together
+
+5. DEBUG MODE:
+   - Add button to show raw Gemini API response
+   - Display actual fetched content for verification
+   - Show processing steps for troubleshooting
+
+EXPECTED OUTPUT FORMAT:
+Instead of: "digital healthcare2w", "the service2w", "today announced2w"
+
+Generate: 
+- "Simple Consult launches affordable virtual healthcare consultation platform"
+- "Delaware-based digital healthcare provider serving adults with routine medical needs"
+- "Benjamin Domingo spokesperson announces company mission to simplify healthcare"
+- "Virtual consultation platform for UTIs, sinus infections, and minor health issues"
+- "Affordable online prescription refill service for routine healthcare"
+
+QUALITY STANDARDS:
+- Minimum 8 words per keyword phrase
+- Maximum 25 words per keyword phrase
+- Each phrase must be grammatically correct
+- No technical artifacts or formatting issues
+- Phrases should sound natural when spoken
+
+Please completely rewrite the keyword extraction logic to generate meaningful, searchable phrases instead of the current fragmented output.

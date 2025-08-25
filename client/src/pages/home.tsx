@@ -82,6 +82,7 @@ export default function Home() {
             result={result}
             isLoading={isLoading}
             onExtractMore={extractMore}
+            rawContent={result?.content}
             data-testid="keywords-results"
           />
         </div>

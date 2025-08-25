@@ -14,91 +14,83 @@ export function extractKeywordsFallback(content: string): FallbackKeywordResult 
   const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 10);
   const words = content.toLowerCase().split(/\s+/);
   
-  // Enhanced patterns for comprehensive extraction
-  const headlinePatterns = /^.{20,100}$|\b[A-Z][^.!?]{20,100}/gm;
-  const announcementPatterns = /\b(announces?|launches?|introduces?|releases?|unveils?|expands?|partners?|acquires?)\b[^.!?]{10,150}/gi;
-  const companyActionPatterns = /\b[A-Z][a-zA-Z\s&]{2,30}\b\s+(announces?|launches?|introduces?|partners?|expands?|acquires?|develops?|creates?)[^.!?]{5,100}/gi;
-  const dateEventPatterns = /\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2},?\s+\d{4}|\d{1,2}\/\d{1,2}\/\d{4}|Q[1-4]\s+\d{4}|\d{4}\s+(conference|summit|event|meeting)/gi;
-  const productPatterns = /\b[A-Z][a-zA-Z\s]{2,40}\b\s+(platform|service|product|solution|technology|software|application|system)/gi;
-  const quotePatterns = /"[^"]{20,200}"/g;
-  const financialPatterns = /\$[\d,]+\.?\d*\s?(million|billion|thousand)?|\d+%\s+(growth|increase|decrease)|revenue\s+of\s+\$[\d,]+|funding\s+of\s+\$[\d,]+/gi;
-  const locationPatterns = /\b[A-Z][a-z]+,?\s+[A-Z]{2}\b|\b[A-Z][a-z]+\s+[A-Z][a-z]+\b|headquarters\s+in\s+[A-Z][a-z\s,]+/gi;
+  // Enhanced patterns for comprehensive extraction of complete phrases
+  const headlinePatterns = /^.{20,200}$|\b[A-Z][^.!?]{20,200}/gm;
+  const announcementPatterns = /[^.!?]*\b(announces?|launches?|introduces?|releases?|unveils?|expands?|partners?|acquires?)\b[^.!?]*/gi;
+  const companyActionPatterns = /[^.!?]*\b[A-Z][a-zA-Z\s&]{2,50}\b[^.!?]*\b(announces?|launches?|introduces?|partners?|expands?|acquires?|develops?|creates?)[^.!?]*/gi;
+  const dateEventPatterns = /[^.!?]*\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2},?\s+\d{4}[^.!?]*|\d{1,2}\/\d{1,2}\/\d{4}[^.!?]*|Q[1-4]\s+\d{4}[^.!?]*|\d{4}\s+(conference|summit|event|meeting)[^.!?]*/gi;
+  const productPatterns = /[^.!?]*\b[A-Z][a-zA-Z\s]{2,50}\b[^.!?]*\b(platform|service|product|solution|technology|software|application|system)[^.!?]*/gi;
+  const quotePatterns = /"[^"]{30,300}"/g;
+  const financialPatterns = /[^.!?]*\$[\d,]+\.?\d*\s?(million|billion|thousand)?[^.!?]*|[^.!?]*\d+%\s+(growth|increase|decrease)[^.!?]*|[^.!?]*revenue[^.!?]*\$[\d,]+[^.!?]*|[^.!?]*funding[^.!?]*\$[\d,]+[^.!?]*/gi;
+  const locationPatterns = /[^.!?]*\b[A-Z][a-z]+,?\s+[A-Z]{2}\b[^.!?]*|[^.!?]*\b[A-Z][a-z]+\s+[A-Z][a-z]+\b[^.!?]*|[^.!?]*headquarters[^.!?]*[A-Z][a-z\s,]+[^.!?]*/gi;
   
-  // Extract N-grams for better phrase coverage
-  const extractNGrams = (text: string, n: number): string[] => {
-    const words = text.split(/\s+/).filter(word => word.length > 2);
-    const ngrams: string[] = [];
-    for (let i = 0; i <= words.length - n; i++) {
-      const ngram = words.slice(i, i + n).join(' ');
-      if (ngram.length >= 10 && ngram.length <= 100) {
-        ngrams.push(ngram);
-      }
-    }
-    return ngrams;
+  // Extract complete sentences and meaningful phrases
+  const extractCompletePhrases = (text: string): string[] => {
+    // Get complete sentences
+    const completeSentences = text.split(/[.!?]+/)
+      .map(s => s.trim())
+      .filter(s => s.length >= 30 && s.length <= 300);
+    
+    // Get meaningful clauses (text between commas that form complete thoughts)
+    const meaningfulClauses = text.split(',')
+      .map(clause => clause.trim())
+      .filter(clause => clause.length >= 30 && clause.length <= 200 && /\b(the|a|an|this|that|these|those|our|their|his|her)\b/i.test(clause));
+    
+    return [...completeSentences, ...meaningfulClauses];
   };
   
-  // Extract meaningful phrases
-  const bigrams = extractNGrams(content, 2);
-  const trigrams = extractNGrams(content, 3);
-  const fourgrams = extractNGrams(content, 4);
+  const completePhrases = extractCompletePhrases(content);
   
-  // Enhanced frequency analysis with phrases
-  const phraseFreq: { [key: string]: number } = {};
-  [...bigrams, ...trigrams, ...fourgrams].forEach(phrase => {
-    const cleanPhrase = phrase.toLowerCase().trim();
-    if (cleanPhrase.length >= 10) {
-      phraseFreq[cleanPhrase] = (phraseFreq[cleanPhrase] || 0) + 1;
-    }
-  });
-  
-  const topPhrases = Object.entries(phraseFreq)
-    .sort(([,a], [,b]) => b - a)
-    .slice(0, 50)
-    .map(([phrase]) => phrase);
-  
-  // Extract by categories with enhanced patterns
+  // Extract by categories with complete phrase focus
   const headlinePhrases = [
-    ...extractMatches(content, headlinePatterns).slice(0, 15),
-    ...topPhrases.slice(0, 10)
-  ].filter(phrase => phrase.length >= 10 && phrase.length <= 100);
+    ...extractMatches(content, headlinePatterns),
+    ...completePhrases.filter(p => p.length <= 150)
+  ].filter(phrase => phrase.length >= 30 && phrase.length <= 300);
   
   const keyAnnouncements = [
-    ...extractMatches(content, announcementPatterns).slice(0, 15),
-    ...sentences.filter(s => /\b(announces?|launches?|introduces?)\b/i.test(s)).slice(0, 10)
-  ].filter(announcement => announcement.length >= 20);
+    ...extractMatches(content, announcementPatterns),
+    ...sentences.filter(s => /\b(announces?|launches?|introduces?)\b/i.test(s) && s.length >= 30)
+  ].filter(announcement => announcement.length >= 30 && announcement.length <= 300);
   
   const companyActions = [
-    ...extractMatches(content, companyActionPatterns).slice(0, 15),
-    ...sentences.filter(s => /\b(partners?|expands?|acquires?)\b/i.test(s)).slice(0, 10)
-  ].filter(action => action.length >= 15);
+    ...extractMatches(content, companyActionPatterns),
+    ...sentences.filter(s => /\b(partners?|expands?|acquires?)\b/i.test(s) && s.length >= 30)
+  ].filter(action => action.length >= 30 && action.length <= 300);
   
   const datesAndEvents = [
-    ...extractMatches(content, dateEventPatterns).slice(0, 15),
-    ...sentences.filter(s => /\b(conference|summit|event|meeting|quarter)\b/i.test(s)).slice(0, 10)
-  ];
+    ...extractMatches(content, dateEventPatterns),
+    ...sentences.filter(s => /\b(conference|summit|event|meeting|quarter)\b/i.test(s) && s.length >= 30)
+  ].filter(event => event.length >= 30 && event.length <= 300);
   
   const productServiceNames = [
-    ...extractMatches(content, productPatterns).slice(0, 15),
-    ...topPhrases.filter(p => /\b(platform|service|product|solution|technology)\b/i.test(p)).slice(0, 10)
-  ];
+    ...extractMatches(content, productPatterns),
+    ...completePhrases.filter(p => /\b(platform|service|product|solution|technology)\b/i.test(p))
+  ].filter(product => product.length >= 30 && product.length <= 300);
   
   const executiveQuotes = [
-    ...extractMatches(content, quotePatterns).slice(0, 15),
-    ...sentences.filter(s => s.includes('said') || s.includes('stated')).slice(0, 10)
-  ];
+    ...extractMatches(content, quotePatterns),
+    ...sentences.filter(s => (s.includes('said') || s.includes('stated')) && s.length >= 30)
+  ].filter(quote => quote.length >= 30 && quote.length <= 300);
   
   const financialMetrics = [
-    ...extractMatches(content, financialPatterns).slice(0, 15),
-    ...sentences.filter(s => /\b(revenue|funding|growth|\$|%)\b/i.test(s)).slice(0, 10)
-  ];
+    ...extractMatches(content, financialPatterns),
+    ...sentences.filter(s => /\b(revenue|funding|growth|\$|%)\b/i.test(s) && s.length >= 30)
+  ].filter(metric => metric.length >= 30 && metric.length <= 300);
   
   const locations = [
-    ...extractMatches(content, locationPatterns).slice(0, 15),
-    ...sentences.filter(s => /\b(headquarters|based in|located)\b/i.test(s)).slice(0, 10)
-  ];
+    ...extractMatches(content, locationPatterns),
+    ...sentences.filter(s => /\b(headquarters|based in|located)\b/i.test(s) && s.length >= 30)
+  ].filter(location => location.length >= 30 && location.length <= 300);
   
-  // Remove duplicates and ensure minimum length
-  const dedupe = (arr: string[]): string[] => Array.from(new Set(arr.filter(item => item && item.length >= 5)));
+  // Remove duplicates, ensure quality phrases, and clean up
+  const dedupe = (arr: string[]): string[] => {
+    return Array.from(new Set(
+      arr
+        .filter(item => item && item.length >= 30 && item.length <= 300)
+        .map(item => item.trim().replace(/^[^a-zA-Z]*|[^a-zA-Z]*$/g, '')) // Remove leading/trailing non-letters
+        .filter(item => item && /^[A-Z]/.test(item)) // Must start with capital letter
+    ));
+  };
   
   const result = {
     headlinePhrases: dedupe(headlinePhrases).slice(0, 15),
