@@ -82,7 +82,7 @@ export function UrlInput({ url, onUrlChange, onExtract, isLoading }: UrlInputPro
           data-testid="button-extract"
         >
           <i className="fas fa-magic"></i>
-          <span>{isLoading ? 'Extracting...' : 'Extract Comprehensive Keywords'}</span>
+          <span>{isLoading ? 'Generating...' : 'Generate Search Queries'}</span>
         </Button>
       </div>
     </div>

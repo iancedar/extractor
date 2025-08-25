@@ -5,77 +5,83 @@ const ai = new GoogleGenAI({
 });
 
 export interface KeywordExtractionResult {
-  headlinePhrases: string[];
-  keyAnnouncements: string[];
-  companyActions: string[];
-  datesAndEvents: string[];
-  productServiceNames: string[];
-  executiveQuotes: string[];
-  financialMetrics: string[];
-  locations: string[];
+  serviceSearches: string[];
+  pricingSearches: string[];
+  conditionSearches: string[];
+  platformSearches: string[];
+  healthcareSearches: string[];
+  announcementSearches: string[];
   confidenceScore: number;
 }
 
 export async function extractKeywordsWithAI(content: string): Promise<KeywordExtractionResult> {
   try {
-    const systemPrompt = `You are a professional keyword extraction specialist. Analyze this press release and extract complete, meaningful phrases that someone could use to search for this exact press release in ChatGPT, Claude, or Gemini.
+    const systemPrompt = `Analyze this press release and extract SHORT search queries (2-6 words each) that someone would type into ChatGPT, Claude, or Gemini to find this specific press release. DO NOT include any company or brand names.
 
-Extract COMPLETE, READABLE phrases in these categories. Each phrase should be a natural, searchable sentence or phrase:
+Extract generic search phrases in these categories (10-15 per category):
 
-COMPANY & ANNOUNCEMENT:
-- Extract the main company announcement (complete sentence)
-- Company name and what they're launching/announcing
-- Business model and service description
+SERVICE SEARCHES:
+- Generic terms people would search for this type of service
+- No brand names, just service descriptions
+- Focus on what the service offers
 
-PRODUCTS & SERVICES:
-- Full product/service names and descriptions
-- Key features and benefits mentioned
-- Platform or technology descriptions
+PRICING SEARCHES:
+- How people would search for pricing information
+- Insurance-related search terms
+- Affordability and access terms
 
-EXECUTIVE INFORMATION:
-- Complete executive quotes (full sentences)
-- Executive names and titles
-- Company spokesperson information
+CONDITION SEARCHES:
+- Conditions and treatments mentioned
+- Symptoms and health issues covered
+- Medical service types
 
-BUSINESS DETAILS:
-- Target market and customer segments
-- Pricing and availability information
-- Geographic markets and locations
+PLATFORM SEARCHES:
+- How the service works
+- Platform and delivery method terms
+- Target market descriptions
 
-INDUSTRY CONTEXT:
-- Healthcare sector and industry terms
-- Competitive advantages mentioned
-- Market positioning statements
+HEALTHCARE SEARCHES:
+- Generic terms for this type of business news
+- Launch and announcement related terms
+- Industry trend searches
 
-TECHNICAL DETAILS:
-- Technology platform descriptions
-- Service delivery methods
-- Integration capabilities
+ANNOUNCEMENT SEARCHES:
+- Business launch and expansion terms
+- New service introduction queries
+- Healthcare industry developments
 
-FORMAT REQUIREMENTS:
-- Each keyword should be 5-25 words long
-- Must be complete, readable phrases
-- No fragments or incomplete sentences
-- No repetition of the same information
-- Each phrase should be unique and searchable
+REQUIREMENTS:
+- Each phrase: 2-6 words maximum
+- NO company names or brand names
+- NO specific dates or locations
+- Focus on WHAT not WHO
+- Natural search language people actually use
+- Generic but specific enough to find this press release
 
-Return clean, complete phrases like:
-- 'Simple Consult launches affordable virtual healthcare consultation platform'
-- 'Delaware-based digital healthcare provider targets routine medical services'
-- 'Benjamin Domingo announces mission to simplify healthcare access'
+GOOD EXAMPLES:
+- '$29 online medical consultations'
+- 'insurance free telehealth'
+- 'virtual healthcare platform launch'
+- 'flat fee online prescriptions'
+- 'telehealth urgent care service'
+- 'online prescription refill service'
+- 'affordable virtual medical visits'
 
-DO NOT return fragments like 'digital healthcare2w' or 'the service2w'
+BAD EXAMPLES:
+- 'Simple Consult launches platform' (has brand name)
+- 'Benjamin Domingo spokesperson announces' (too specific)
+- 'Delaware-based digital healthcare provider today announced launch' (too long)
+
+Return only short, brandless search terms that would naturally lead someone to this press release.
 
 Respond with JSON in this exact format:
 {
-  "headlinePhrases": ["complete phrase 1", "complete phrase 2", ...],
-  "keyAnnouncements": ["full announcement 1", "full announcement 2", ...],
-  "companyActions": ["company action phrase 1", "company action phrase 2", ...],
-  "datesAndEvents": ["date/event phrase 1", "date/event phrase 2", ...],
-  "productServiceNames": ["product description 1", "service description 2", ...],
-  "executiveQuotes": ["complete executive quote 1", "executive quote 2", ...],
-  "financialMetrics": ["financial detail 1", "financial detail 2", ...],
-  "locations": ["location detail 1", "location detail 2", ...],
+  "serviceSearches": ["search term 1", "search term 2", ...],
+  "pricingSearches": ["pricing term 1", "pricing term 2", ...], 
+  "conditionSearches": ["condition term 1", "condition term 2", ...],
+  "platformSearches": ["platform term 1", "platform term 2", ...],
+  "healthcareSearches": ["healthcare term 1", "healthcare term 2", ...],
+  "announcementSearches": ["announcement term 1", "announcement term 2", ...],
   "confidenceScore": 95
 }`;
 
@@ -87,41 +93,33 @@ Respond with JSON in this exact format:
         responseSchema: {
           type: "object",
           properties: {
-            headlinePhrases: { 
+            serviceSearches: { 
               type: "array", 
               items: { type: "string" }
             },
-            keyAnnouncements: { 
+            pricingSearches: { 
               type: "array", 
               items: { type: "string" }
             },
-            companyActions: { 
+            conditionSearches: { 
               type: "array", 
               items: { type: "string" }
             },
-            datesAndEvents: { 
+            platformSearches: { 
               type: "array", 
               items: { type: "string" }
             },
-            productServiceNames: { 
+            healthcareSearches: { 
               type: "array", 
               items: { type: "string" }
             },
-            executiveQuotes: { 
-              type: "array", 
-              items: { type: "string" }
-            },
-            financialMetrics: { 
-              type: "array", 
-              items: { type: "string" }
-            },
-            locations: { 
+            announcementSearches: { 
               type: "array", 
               items: { type: "string" }
             },
             confidenceScore: { type: "number" }
           },
-          required: ["headlinePhrases", "keyAnnouncements", "companyActions", "datesAndEvents", "productServiceNames", "executiveQuotes", "financialMetrics", "locations", "confidenceScore"]
+          required: ["serviceSearches", "pricingSearches", "conditionSearches", "platformSearches", "healthcareSearches", "announcementSearches", "confidenceScore"]
         }
       },
       contents: content,
@@ -132,29 +130,39 @@ Respond with JSON in this exact format:
       throw new Error("Empty response from Gemini API");
     }
 
-    const result: KeywordExtractionResult = JSON.parse(rawJson);
-    
-    // Validate that all keywords exist in the content
-    const allKeywords = [
-      ...result.headlinePhrases,
-      ...result.keyAnnouncements,
-      ...result.companyActions,
-      ...result.datesAndEvents,
-      ...result.productServiceNames,
-      ...result.executiveQuotes,
-      ...result.financialMetrics,
-      ...result.locations
+    const data: KeywordExtractionResult = JSON.parse(rawJson);
+
+    // Apply brand name filtering and word count validation
+    const brandNameBlacklist = [
+      'simple consult', 'benjamin domingo', 'dover', 'delaware', 'globe newswire',
+      'businesswire', 'pr newswire', 'reuters', 'yahoo finance'
     ];
-    
-    const contentLower = content.toLowerCase();
-    const validKeywords = allKeywords.filter(keyword => 
-      contentLower.includes(keyword.toLowerCase())
-    );
-    
-    if (validKeywords.length < allKeywords.length * 0.7) {
-      throw new Error("Too many keywords not found in content");
-    }
-    
+
+    const filterKeywords = (keywords: string[]): string[] => {
+      return keywords
+        .filter(keyword => {
+          // Filter by word count (2-6 words)
+          const wordCount = keyword.trim().split(/\s+/).length;
+          if (wordCount < 2 || wordCount > 6) return false;
+          
+          // Filter out brand names
+          const lowerKeyword = keyword.toLowerCase();
+          return !brandNameBlacklist.some(brand => lowerKeyword.includes(brand));
+        })
+        .slice(0, 15); // Limit to 15 per category
+    };
+
+    // Validate and filter all categories
+    const result: KeywordExtractionResult = {
+      serviceSearches: filterKeywords(data.serviceSearches || []),
+      pricingSearches: filterKeywords(data.pricingSearches || []),
+      conditionSearches: filterKeywords(data.conditionSearches || []),
+      platformSearches: filterKeywords(data.platformSearches || []),
+      healthcareSearches: filterKeywords(data.healthcareSearches || []),
+      announcementSearches: filterKeywords(data.announcementSearches || []),
+      confidenceScore: data.confidenceScore || 85
+    };
+
     return result;
   } catch (error) {
     console.error("Gemini API error:", error);

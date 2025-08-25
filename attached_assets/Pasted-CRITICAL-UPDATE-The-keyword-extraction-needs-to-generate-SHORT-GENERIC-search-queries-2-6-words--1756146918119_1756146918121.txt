@@ -1,0 +1,114 @@
+CRITICAL UPDATE: The keyword extraction needs to generate SHORT, GENERIC search queries (2-6 words) WITHOUT brand names that someone would use to find this press release in ChatGPT/Claude/Gemini.
+
+CURRENT PROBLEM:
+- Keywords are too long and include brand names
+- Users need SHORT search phrases they'd naturally type
+- Should be generic enough to find the press release without knowing company name
+
+NEW EXTRACTION STRATEGY:
+
+GEMINI PROMPT REPLACEMENT:
+"Analyze this press release and extract SHORT search queries (2-6 words each) that someone would type into ChatGPT, Claude, or Gemini to find this specific press release. DO NOT include any company or brand names.
+
+Press Release Content:
+[ACTUAL_CONTENT_HERE]
+
+Extract generic search phrases in these categories (10-15 per category):
+
+HEALTHCARE SERVICE QUERIES:
+- Generic terms people would search for this type of service
+- No brand names, just service descriptions
+- Focus on what the service offers
+
+PRICING & ACCESS QUERIES:
+- How people would search for pricing information
+- Insurance-related search terms
+- Affordability and access terms
+
+MEDICAL CONDITION QUERIES:
+- Conditions and treatments mentioned
+- Symptoms and health issues covered
+- Medical service types
+
+BUSINESS MODEL QUERIES:
+- How the service works
+- Platform and delivery method terms
+- Target market descriptions
+
+ANNOUNCEMENT QUERIES:
+- Generic terms for this type of business news
+- Launch and announcement related terms
+- Industry trend searches
+
+REQUIREMENTS:
+- Each phrase: 2-6 words maximum
+- NO company names or brand names
+- NO specific dates or locations
+- Focus on WHAT not WHO
+- Natural search language people actually use
+- Generic but specific enough to find this press release
+
+GOOD EXAMPLES:
+- '$29 online medical consultations'
+- 'insurance free telehealth'
+- 'virtual healthcare platform launch'
+- 'flat fee online prescriptions'
+- 'telehealth urgent care service'
+- 'online prescription refill service'
+- 'affordable virtual medical visits'
+
+BAD EXAMPLES:
+- 'Simple Consult launches platform' (has brand name)
+- 'Benjamin Domingo spokesperson announces' (too specific)
+- 'Delaware-based digital healthcare provider today announced launch' (too long)
+
+Return only short, brandless search terms that would naturally lead someone to this press release."
+
+CODE CHANGES NEEDED:
+
+1. KEYWORD LENGTH FILTER:
+   - Automatically filter keywords to 2-6 words only
+   - Remove any phrases longer than 6 words
+   - Count words properly (split by spaces)
+
+2. BRAND NAME REMOVAL:
+   - Create blacklist: ['Simple Consult', 'Benjamin Domingo', 'Dover', 'Delaware', 'GLOBE NEWSWIRE']
+   - Automatically remove any keywords containing these terms
+   - Strip company-specific references
+
+3. SEARCH OPTIMIZATION:
+   - Focus on service types, not company names
+   - Emphasize unique value propositions ($29, insurance-free, etc.)
+   - Include condition-specific terms (UTI, acne, blood pressure, etc.)
+
+4. CATEGORY REORGANIZATION:
+   Rename categories to match search intent:
+   - "Service Searches" (instead of Company Actions)
+   - "Pricing Searches" (instead of Financial Metrics)  
+   - "Condition Searches" (instead of Products & Services)
+   - "Platform Searches" (instead of Executive Quotes)
+   - "Healthcare Searches" (instead of Locations)
+
+5. QUALITY FILTERS:
+   - Remove duplicate or very similar phrases
+   - Ensure each keyword is naturally searchable
+   - Test that keywords would realistically lead to this press release
+
+EXPECTED OUTPUT:
+Service Searches:
+- "online medical consultations"
+- "virtual healthcare platform"
+- "telehealth urgent care"
+- "insurance free healthcare"
+
+Pricing Searches:
+- "$29 medical consultations"
+- "flat fee telehealth"
+- "affordable online prescriptions"
+
+Condition Searches:
+- "UTI online treatment"
+- "acne prescription online"
+- "blood pressure refill"
+
+This will generate practical, short search terms that users would actually type to find this press release, without any brand names.

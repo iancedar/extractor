@@ -50,7 +50,7 @@ export function useKeywordExtraction() {
       
       toast({
         title: "Keywords Extracted Successfully", 
-        description: `Found ${extractionResult.stats.totalKeywords} keywords across 8 categories using ${extractionResult.extractionMethod === 'ai' ? 'AI' : extractionResult.extractionMethod === 'enhanced' ? 'enhanced' : 'fallback'} method`,
+        description: `Generated ${extractionResult.stats.totalKeywords} search queries across 6 categories using ${extractionResult.extractionMethod === 'ai' ? 'AI' : extractionResult.extractionMethod === 'enhanced' ? 'enhanced' : 'fallback'} method`,
       });
       
     } catch (err) {

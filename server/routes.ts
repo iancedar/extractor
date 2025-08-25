@@ -23,6 +23,8 @@ const healthLimiter = rateLimit({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Trust proxy setting for Replit environment
+  app.set('trust proxy', true);
   
   // Health check endpoint
   app.get("/api/health", healthLimiter, async (req, res) => {
@@ -91,14 +93,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const extraction = await storage.createExtraction({
         url,
         content: contentResult.content,
-        headlinePhrases: keywordResult.headlinePhrases,
-        keyAnnouncements: keywordResult.keyAnnouncements,
-        companyActions: keywordResult.companyActions,
-        datesAndEvents: keywordResult.datesAndEvents,
-        productServiceNames: keywordResult.productServiceNames,
-        executiveQuotes: keywordResult.executiveQuotes,
-        financialMetrics: keywordResult.financialMetrics,
-        locations: keywordResult.locations,
+        serviceSearches: keywordResult.serviceSearches,
+        pricingSearches: keywordResult.pricingSearches,
+        conditionSearches: keywordResult.conditionSearches,
+        platformSearches: keywordResult.platformSearches,
+        healthcareSearches: keywordResult.healthcareSearches,
+        announcementSearches: keywordResult.announcementSearches,
         extractionMethod,
         confidenceScore,
         extractionTime,
@@ -112,27 +112,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         totalResponseTime: currentStats.totalResponseTime + extractionTime,
       });
       
-      const totalKeywords = extraction.headlinePhrases.length + 
-                          extraction.keyAnnouncements.length + 
-                          extraction.companyActions.length + 
-                          extraction.datesAndEvents.length + 
-                          extraction.productServiceNames.length + 
-                          extraction.executiveQuotes.length + 
-                          extraction.financialMetrics.length + 
-                          extraction.locations.length;
+      const totalKeywords = extraction.serviceSearches.length + 
+                          extraction.pricingSearches.length + 
+                          extraction.conditionSearches.length + 
+                          extraction.platformSearches.length + 
+                          extraction.healthcareSearches.length + 
+                          extraction.announcementSearches.length;
 
       const response: ExtractionResponse = {
         id: extraction.id,
         url: extraction.url,
         content: getContentPreview(extraction.content, 1000),
-        headlinePhrases: extraction.headlinePhrases,
-        keyAnnouncements: extraction.keyAnnouncements,
-        companyActions: extraction.companyActions,
-        datesAndEvents: extraction.datesAndEvents,
-        productServiceNames: extraction.productServiceNames,
-        executiveQuotes: extraction.executiveQuotes,
-        financialMetrics: extraction.financialMetrics,
-        locations: extraction.locations,
+        serviceSearches: extraction.serviceSearches,
+        pricingSearches: extraction.pricingSearches,
+        conditionSearches: extraction.conditionSearches,
+        platformSearches: extraction.platformSearches,
+        healthcareSearches: extraction.healthcareSearches,
+        announcementSearches: extraction.announcementSearches,
         extractionMethod: extraction.extractionMethod as 'ai' | 'fallback' | 'enhanced',
         confidenceScore: extraction.confidenceScore ?? undefined,
         extractionTime: extraction.extractionTime,
@@ -140,14 +136,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           wordCount: contentResult.wordCount,
           totalKeywords,
           keywordsByCategory: {
-            'headline-phrases': extraction.headlinePhrases.length,
-            'key-announcements': extraction.keyAnnouncements.length,
-            'company-actions': extraction.companyActions.length,
-            'dates-events': extraction.datesAndEvents.length,
-            'product-service-names': extraction.productServiceNames.length,
-            'executive-quotes': extraction.executiveQuotes.length,
-            'financial-metrics': extraction.financialMetrics.length,
-            'locations': extraction.locations.length,
+            'service-searches': extraction.serviceSearches.length,
+            'pricing-searches': extraction.pricingSearches.length,
+            'condition-searches': extraction.conditionSearches.length,
+            'platform-searches': extraction.platformSearches.length,
+            'healthcare-searches': extraction.healthcareSearches.length,
+            'announcement-searches': extraction.announcementSearches.length,
           },
         },
       };
