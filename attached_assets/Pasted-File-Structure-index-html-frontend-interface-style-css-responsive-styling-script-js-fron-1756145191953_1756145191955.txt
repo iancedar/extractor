@@ -1,0 +1,65 @@
+File Structure:
+- index.html (frontend interface)
+- style.css (responsive styling)
+- script.js (frontend logic)
+- server.js (Express server with API endpoints)
+- gemini-client.js (Gemini API wrapper)
+- content-processor.js (content cleaning and validation)
+- package.json (dependencies and scripts)
+
+API ENDPOINTS:
+- POST /extract-keywords (main extraction endpoint)
+- POST /fetch-content (content fetching with validation)
+- GET /health (API health check)
+
+ERROR HANDLING:
+- Invalid URL format validation
+- Failed content fetching (404, timeout, etc.)
+- Gemini API errors (invalid key, rate limits, quota exceeded)
+- Empty or insufficient content
+- JSON parsing errors from API response
+- Fallback extraction if API fails
+
+SECURITY FEATURES:
+- API key validation and secure handling
+- Input sanitization and URL validation
+- Rate limiting to prevent abuse
+- Content length limits for API calls
+- CORS configuration for security
+- Environment variable protection
+
+DEBUGGING FEATURES:
+- Content preview panel (first 1000 characters of fetched content)
+- API call statistics and response times
+- Extraction method indicator (AI vs fallback)
+- Console logging for development
+- Error tracking and reporting
+
+VALIDATION SYSTEM:
+- Verify all extracted keywords exist in original content
+- Content source validation for each keyword
+- Minimum content length requirements
+- API response validation and error handling
+- Keyword relevance scoring
+
+FALLBACK SYSTEM:
+If Gemini API fails, implement basic keyword extraction using:
+- Frequency analysis for important terms
+- Named entity recognition for companies/people/places
+- Pattern matching for financial terms and dates
+- Sentence extraction for key announcements
+
+ENVIRONMENT SETUP:
+Create these environment variables in Replit Secrets:
+- GEMINI_API_KEY (from Google AI Studio)
+- PORT (default: 3000)
+
+USER EXPERIENCE:
+- Intuitive single-page interface
+- Clear progress indicators
+- Helpful error messages with solutions
+- Fast response times with caching
+- Professional, modern design
+- Accessible for all devices
+
+The final tool should be production-ready, handle all edge cases gracefully, extract only real content from press releases, and generate highly searchable keywords that help users find exact press releases in LLM conversations.
