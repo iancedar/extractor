@@ -8,7 +8,7 @@ export function useKeywordExtraction() {
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ExtractionResponse | undefined>(undefined);
-  const [lastUrl, setLastUrl] = useState<string>("");
+  const [lastInput, setLastInput] = useState<{ inputType: 'url' | 'text'; url?: string; text?: string } | null>(null);
   const { toast } = useToast();
 
   const simulateProgress = useCallback(() => {
@@ -25,17 +25,20 @@ export function useKeywordExtraction() {
     return interval;
   }, []);
 
-  const extractKeywords = useCallback(async (url: string, useFallbackMode: boolean = false) => {
+  const extractKeywords = useCallback(async (input: { inputType: 'url' | 'text'; url?: string; text?: string }, useFallbackMode: boolean = false) => {
     setIsLoading(true);
     setProgress(0);
     setError(null);
     setResult(undefined);
-    setLastUrl(url);
+    setLastInput(input);
 
     const progressInterval = simulateProgress();
 
     try {
-      const requestData: ExtractionRequest = { url };
+      const requestData: ExtractionRequest = input.inputType === 'url' 
+        ? { url: input.url, inputType: 'url' }
+        : { text: input.text, inputType: 'text' };
+      
       const response = await apiRequest(
         'POST', 
         '/api/extract-keywords', 
@@ -75,23 +78,23 @@ export function useKeywordExtraction() {
   }, [simulateProgress, toast]);
 
   const retry = useCallback(() => {
-    if (lastUrl) {
-      extractKeywords(lastUrl);
+    if (lastInput) {
+      extractKeywords(lastInput);
     }
-  }, [lastUrl, extractKeywords]);
+  }, [lastInput, extractKeywords]);
 
   const useFallback = useCallback(() => {
-    if (lastUrl) {
-      extractKeywords(lastUrl, true);
+    if (lastInput) {
+      extractKeywords(lastInput, true);
     }
-  }, [lastUrl, extractKeywords]);
+  }, [lastInput, extractKeywords]);
 
   const extractMore = useCallback(() => {
-    if (lastUrl) {
+    if (lastInput) {
       // Run enhanced extraction with expanded parameters
-      extractKeywords(lastUrl, false);
+      extractKeywords(lastInput, false);
     }
-  }, [lastUrl, extractKeywords]);
+  }, [lastInput, extractKeywords]);
 
   return {
     extractKeywords,

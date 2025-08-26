@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { UrlInput } from "@/components/url-input";
+import { DualInput } from "@/components/dual-input";
 import { ProgressSection } from "@/components/progress-section";
 import { ContentPreview } from "@/components/content-preview";
 import { KeywordsResults } from "@/components/keywords-results";
@@ -9,7 +8,6 @@ import { ApiHealthStatus } from "@/components/api-health-status";
 import { useKeywordExtraction } from "@/hooks/use-keyword-extraction";
 
 export default function Home() {
-  const [url, setUrl] = useState("");
   const { 
     extractKeywords, 
     isLoading, 
@@ -21,10 +19,8 @@ export default function Home() {
     extractMore
   } = useKeywordExtraction();
 
-  const handleExtract = async () => {
-    if (url.trim()) {
-      await extractKeywords(url);
-    }
+  const handleExtract = async (data: { inputType: 'url' | 'text'; url?: string; text?: string }) => {
+    await extractKeywords(data);
   };
 
   return (
@@ -50,13 +46,10 @@ export default function Home() {
 
       <main className="max-w-6xl mx-auto px-6 py-8">
         
-        {/* URL Input Section */}
-        <UrlInput 
-          url={url}
-          onUrlChange={setUrl}
+        {/* Dual Input Section */}
+        <DualInput 
           onExtract={handleExtract}
           isLoading={isLoading}
-          data-testid="url-input-section"
         />
 
         {/* Progress Section */}

@@ -42,6 +42,8 @@ export class MemStorage implements IStorage {
     const id = randomUUID();
     const newExtraction: Extraction = {
       ...extraction,
+      url: extraction.url ?? null,
+      confidenceScore: extraction.confidenceScore ?? null,
       id,
       createdAt: new Date(),
     };

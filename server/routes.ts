@@ -59,7 +59,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     let extractionMethod: 'ai' | 'fallback' = 'ai';
     
     try {
-      const { url } = extractionRequestSchema.parse(req.body);
+      const { url, text, inputType } = extractionRequestSchema.parse(req.body);
       
       // Update API stats - request started
       const currentStats = await storage.getApiStats();
@@ -68,21 +68,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
         totalRequests: currentStats.totalRequests + 1,
       });
       
-      // Fetch and validate content
-      const contentResult = await fetchAndValidateContent(url);
+      // Get content either from URL or directly from text
+      let contentResult;
+      let content: string;
+      
+      if (inputType === 'url' && url) {
+        // Fetch and validate content from URL
+        contentResult = await fetchAndValidateContent(url);
+        content = contentResult.content;
+      } else if (inputType === 'text' && text) {
+        // Use provided text directly, validate it meets minimum requirements
+        const wordCount = text.split(/\s+/).length;
+        const isValid = text.length >= 100 && wordCount >= 20;
+        
+        if (!isValid) {
+          throw new Error('Text content too short or insufficient for keyword extraction');
+        }
+        
+        content = text.slice(0, 50000); // Limit content length for API
+        contentResult = {
+          content,
+          wordCount,
+          fetchTime: 0,
+          isValid: true
+        };
+      } else {
+        throw new Error('Invalid input: must provide either URL or text content');
+      }
       
       let keywordResult;
       let confidenceScore = 0;
       
       try {
         // Try AI extraction first
-        keywordResult = await extractKeywordsWithAI(contentResult.content);
+        keywordResult = await extractKeywordsWithAI(content);
         confidenceScore = keywordResult.confidenceScore;
         extractionMethod = 'ai';
       } catch (aiError) {
         console.warn('AI extraction failed, using fallback:', aiError);
         // Fallback to rule-based extraction
-        keywordResult = extractKeywordsFallback(contentResult.content);
+        keywordResult = extractKeywordsFallback(content);
         confidenceScore = keywordResult.confidenceScore;
         extractionMethod = 'fallback';
       }
@@ -91,8 +116,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Save extraction to storage
       const extraction = await storage.createExtraction({
-        url,
-        content: contentResult.content,
+        url: url ?? null,
+        content,
+        inputType,
         serviceSearches: keywordResult.serviceSearches,
         pricingSearches: keywordResult.pricingSearches,
         conditionSearches: keywordResult.conditionSearches,
@@ -121,8 +147,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const response: ExtractionResponse = {
         id: extraction.id,
-        url: extraction.url,
+        url: extraction.url || undefined,
         content: getContentPreview(extraction.content, 1000),
+        inputType: extraction.inputType as 'url' | 'text',
         serviceSearches: extraction.serviceSearches,
         pricingSearches: extraction.pricingSearches,
         conditionSearches: extraction.conditionSearches,
@@ -178,10 +205,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Fetch content endpoint (for preview)
+  // Fetch content endpoint (for preview) - only for URL inputs
   app.post("/api/fetch-content", async (req, res) => {
     try {
-      const { url } = extractionRequestSchema.parse(req.body);
+      const { url } = req.body;
+      if (!url || typeof url !== 'string') {
+        throw new Error('URL is required');
+      }
       const contentResult = await fetchAndValidateContent(url);
       
       res.json({
@@ -219,7 +249,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         avgResponseTime,
         rateLimitStatus: 'Safe',
         recentActivity: recentExtractions.map(extraction => ({
-          url: new URL(extraction.url).hostname,
+          url: extraction.url ? new URL(extraction.url).hostname : extraction.inputType === 'text' ? 'Direct Text' : 'Unknown',
           timestamp: extraction.createdAt.toISOString(),
           success: true,
           method: extraction.extractionMethod,

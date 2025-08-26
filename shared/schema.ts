@@ -5,8 +5,9 @@ import { z } from "zod";
 
 export const extractions = pgTable("extractions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  url: text("url").notNull(),
+  url: text("url"), // Optional - only set when URL is provided
   content: text("content").notNull(),
+  inputType: text("input_type").notNull(), // 'url' or 'text'
   serviceSearches: jsonb("service_searches").$type<string[]>().notNull(),
   pricingSearches: jsonb("pricing_searches").$type<string[]>().notNull(),
   conditionSearches: jsonb("condition_searches").$type<string[]>().notNull(),
@@ -29,13 +30,28 @@ export const apiStats = pgTable("api_stats", {
 });
 
 export const extractionRequestSchema = z.object({
-  url: z.string().url("Please enter a valid URL"),
-});
+  url: z.string().url("Please enter a valid URL").optional(),
+  text: z.string().min(100, "Please enter at least 100 characters of text").optional(),
+  inputType: z.enum(['url', 'text']),
+}).refine(
+  (data) => {
+    if (data.inputType === 'url') {
+      return data.url && !data.text;
+    } else if (data.inputType === 'text') {
+      return data.text && !data.url;
+    }
+    return false;
+  },
+  {
+    message: "Please provide either a URL or text content, but not both",
+  }
+);
 
 export const extractionResponseSchema = z.object({
   id: z.string(),
-  url: z.string(),
+  url: z.string().optional(),
   content: z.string(),
+  inputType: z.enum(['url', 'text']),
   serviceSearches: z.array(z.string()),
   pricingSearches: z.array(z.string()),
   conditionSearches: z.array(z.string()),
