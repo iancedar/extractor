@@ -86,11 +86,12 @@ Respond with JSON in this exact format:
 }`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-pro",
+      model: "gemini-1.5-pro",
+      contents: content,
       config: {
         systemInstruction: systemPrompt,
         responseMimeType: "application/json",
-        responseSchema: {
+        responseJsonSchema: {
           type: "object",
           properties: {
             serviceSearches: { 
@@ -121,8 +122,7 @@ Respond with JSON in this exact format:
           },
           required: ["serviceSearches", "pricingSearches", "conditionSearches", "platformSearches", "healthcareSearches", "announcementSearches", "confidenceScore"]
         }
-      },
-      contents: content,
+      }
     });
 
     const rawJson = response.text;
@@ -175,7 +175,7 @@ export async function checkGeminiHealth(): Promise<{ status: 'available' | 'unav
   
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-1.5-flash",
       contents: "Health check - respond with 'OK'",
     });
     
